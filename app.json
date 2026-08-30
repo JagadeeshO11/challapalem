@@ -1,0 +1,20 @@
+{
+  "expo": {
+    "name": "Challapalle",
+    "slug": "challapalle",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "scheme": "challapalle",
+    "web": {
+      "bundler": "metro",
+      "output": "single"
+    },
+    "android": {
+      "package": "in.challapalle.app"
+    },
+    "ios": {
+      "bundleIdentifier": "in.challapalle.app"
+    }
+  }
+}
