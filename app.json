@@ -4,17 +4,28 @@
     "slug": "challapalle",
     "version": "1.0.0",
     "orientation": "portrait",
-    "userInterfaceStyle": "automatic",
+    "userInterfaceStyle": "light",
     "scheme": "challapalle",
+    "icon": "./challapalem-logo.png",
+    "splash": {
+      "image": "./challapalem-logo.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#F8F5EA"
+    },
     "web": {
       "bundler": "metro",
-      "output": "single"
+      "output": "static",
+      "favicon": "./challapalem-logo.png"
     },
     "android": {
       "package": "in.challapalle.app"
     },
     "ios": {
       "bundleIdentifier": "in.challapalle.app"
+    },
+    "plugins": ["expo-router"],
+    "experiments": {
+      "typedRoutes": true
     }
   }
 }
