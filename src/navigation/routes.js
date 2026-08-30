@@ -1,0 +1,15 @@
+export const routes = {
+  home: '/',
+  explore: '/explore',
+  places: '/explore/places',
+  heritage: '/explore/heritage',
+  nature: '/explore/nature',
+  events: '/events',
+  businesses: '/businesses',
+  community: '/community',
+  gallery: '/gallery',
+  profile: '/profile',
+  signIn: '/auth/sign-in',
+  signUp: '/auth/sign-up',
+  admin: '/admin',
+};
