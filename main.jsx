@@ -1,0 +1,7 @@
+import React from 'react';
+import { createRoot } from 'react-dom/client';
+import './App.css';
+import logo from './challapalem-logo.png';
+
+function App(){return <main className="shell"><nav><a className="brand" href="#top"><img src={logo}/><span>Challapalle</span></a><div className="links"><a href="#story">Our Story</a><a href="#places">Places</a><a href="#community">Community</a></div></nav><section className="hero" id="top"><div><p className="eyebrow">Our village · Our story · Our home</p><h1>Welcome to <em>Challapalle</em></h1><p className="lead">A digital home for the people, places, stories, traditions and future of our village.</p><div className="buttons"><a className="primary" href="#story">Explore the village</a><a className="secondary" href="#community">Join the community</a></div></div><div className="art"><div className="sun-glow"/><img src={logo} alt="Challapalle village emblem"/></div></section><section className="cards" id="story"><article><small>01</small><h2>Our Story</h2><p>History, people and memories that give Challapalle its character.</p></article><article id="places"><small>02</small><h2>Local Places</h2><p>Discover landmarks, nature, schools, temples and everyday village life.</p></article><article id="community"><small>03</small><h2>Community</h2><p>A shared space for local news, events, services and announcements.</p></article></section></main>}
+createRoot(document.getElementById('root')).render(<App/>);
