@@ -1,10 +1,7 @@
 import React from 'react';
-import RoutePage from '../src/components/RoutePage';
+import DataDirectory from './data-directory';
+import { events } from '../src/data/content';
 
 export default function EventsScreen() {
-  return <RoutePage eyebrow="EVENTS" title="What's happening in Challapalle." description="A home for village celebrations, gatherings, festivals and community moments." cards={[
-    { icon: '🎉', title: 'Festivals', text: 'Celebrate the traditions and occasions that bring the village together.' },
-    { icon: '📅', title: 'Community events', text: 'Keep track of local gatherings, meetings and activities.' },
-    { icon: '📸', title: 'Village moments', text: 'Share and preserve memories from important days.' },
-  ]} />;
+  return <DataDirectory eyebrow="EVENTS" title="What's happening in Challapalle." description="A home for village celebrations, gatherings, festivals and community moments." items={events} />;
 }
