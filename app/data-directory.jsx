@@ -14,6 +14,13 @@ const iconFor = (item) => {
   return '📍';
 };
 
+const routeFor = {
+  place: '/explore/places',
+  event: '/events',
+  business: '/businesses',
+  community: '/community',
+};
+
 export default function DataDirectory({ title, eyebrow, description, items = [], detailType }) {
   const [query, setQuery] = useState('');
   const filtered = useMemo(() => {
@@ -21,6 +28,8 @@ export default function DataDirectory({ title, eyebrow, description, items = [],
     if (!normalized) return items;
     return items.filter((item) => `${item.title} ${item.category ?? ''} ${item.description}`.toLowerCase().includes(normalized));
   }, [items, query]);
+
+  const basePath = routeFor[detailType];
 
   return (
     <ScrollView style={styles.root} contentContainerStyle={styles.page} keyboardShouldPersistTaps="handled">
@@ -43,7 +52,7 @@ export default function DataDirectory({ title, eyebrow, description, items = [],
           icon={iconFor(item)}
           title={item.title}
           text={item.description}
-          onPress={detailType ? () => router.push({ pathname: '/details', params: { key: item.id, type: detailType } }) : undefined}
+          onPress={basePath ? () => router.push({ pathname: `${basePath}/[id]`, params: { id: item.id } }) : undefined}
         />
       )) : (
         <View style={styles.empty}>
@@ -61,7 +70,7 @@ const styles = StyleSheet.create({
   eyebrow: { color: theme.colors.accent, fontSize: 11, fontWeight: '900', letterSpacing: 2, marginTop: 20 },
   title: { color: theme.colors.primaryDark, fontSize: 42, fontWeight: '900' },
   description: { color: theme.colors.muted, fontSize: 16, lineHeight: 25, marginBottom: 10 },
-  search: { backgroundColor: theme.colors.surface, borderWidth: 1, borderColor: theme.colors.border, borderRadius: theme.radius.pill, paddingHorizontal: 18, paddingVertical: 13, fontSize: 15, color: theme.colors.primaryDark, marginBottom: 0 },
+  search: { backgroundColor: theme.colors.surface, borderWidth: 1, borderColor: theme.colors.border, borderRadius: theme.radius.pill, paddingHorizontal: 18, paddingVertical: 13, fontSize: 15, color: theme.colors.primaryDark },
   resultCount: { color: theme.colors.muted, fontSize: 12, fontWeight: '700', marginLeft: 4, marginBottom: 2 },
   empty: { padding: 30, backgroundColor: theme.colors.surface, borderRadius: theme.radius.md, borderWidth: 1, borderColor: theme.colors.border },
   emptyTitle: { fontSize: 18, fontWeight: '800', color: theme.colors.primaryDark },
