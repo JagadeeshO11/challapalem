@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { router } from 'expo-router';
 import { theme } from '../src/theme';
+import { searchContent } from '../src/services/contentService';
 import FeatureCard from '../src/components/FeatureCard';
 
 const iconFor = (item) => {
@@ -21,14 +22,9 @@ const routeFor = {
   community: '/community',
 };
 
-export default function DataDirectory({ title, eyebrow, description, items = [], detailType }) {
+export default function DataDirectory({ title, eyebrow, description, detailType }) {
   const [query, setQuery] = useState('');
-  const filtered = useMemo(() => {
-    const normalized = query.trim().toLowerCase();
-    if (!normalized) return items;
-    return items.filter((item) => `${item.title} ${item.category ?? ''} ${item.description}`.toLowerCase().includes(normalized));
-  }, [items, query]);
-
+  const filtered = useMemo(() => searchContent(detailType, query), [detailType, query]);
   const basePath = routeFor[detailType];
 
   return (
@@ -36,29 +32,12 @@ export default function DataDirectory({ title, eyebrow, description, items = [],
       <Text style={styles.eyebrow}>{eyebrow}</Text>
       <Text style={styles.title}>{title}</Text>
       <Text style={styles.description}>{description}</Text>
-      <TextInput
-        value={query}
-        onChangeText={setQuery}
-        placeholder="Search this section..."
-        placeholderTextColor="#899189"
-        accessibilityLabel={`Search ${title}`}
-        returnKeyType="search"
-        style={styles.search}
-      />
+      <TextInput value={query} onChangeText={setQuery} placeholder="Search this section..." placeholderTextColor="#899189" accessibilityLabel={`Search ${title}`} returnKeyType="search" style={styles.search} />
       <Text style={styles.resultCount}>{filtered.length} {filtered.length === 1 ? 'result' : 'results'}</Text>
       {filtered.length ? filtered.map((item) => (
-        <FeatureCard
-          key={item.id}
-          icon={iconFor(item)}
-          title={item.title}
-          text={item.description}
-          onPress={basePath ? () => router.push({ pathname: `${basePath}/[id]`, params: { id: item.id } }) : undefined}
-        />
+        <FeatureCard key={item.id} icon={iconFor(item)} title={item.title} text={item.description} onPress={basePath ? () => router.push({ pathname: `${basePath}/[id]`, params: { id: item.id } }) : undefined} />
       )) : (
-        <View style={styles.empty}>
-          <Text style={styles.emptyTitle}>Nothing found</Text>
-          <Text style={styles.emptyText}>Try a different search term.</Text>
-        </View>
+        <View style={styles.empty}><Text style={styles.emptyTitle}>Nothing found</Text><Text style={styles.emptyText}>Try a different search term.</Text></View>
       )}
     </ScrollView>
   );
