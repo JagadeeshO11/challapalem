@@ -24,7 +24,7 @@ export function getContentById(type, id) {
   return getContentCollection(type).find((item) => item.id === id) ?? null;
 }
 
-export function searchContent(type, query) {
+export function searchContent(type, query = '') {
   const normalized = query.trim().toLowerCase();
   if (!normalized) return getContentList(type);
 
@@ -46,22 +46,32 @@ function mapRemoteItem(row) {
   };
 }
 
+function localResult(type, query, error = null) {
+  const data = query === undefined ? getContentList(type) : searchContent(type, query);
+  return { data, error, source: error ? 'local-fallback' : 'local' };
+}
+
+function fallbackError(error) {
+  return error instanceof Error ? error : new Error('The online directory is temporarily unavailable.');
+}
+
 export async function getContentListRemote(type) {
   if (!isSupabaseConfigured || !supabase || !contentTypes[type]) {
-    return { data: getContentList(type), error: null, source: 'local' };
+    return localResult(type);
   }
 
-  const { data, error } = await supabase
-    .from('content_items')
-    .select('type, slug, title, category, description, details, date_text')
-    .eq('type', type)
-    .order('title', { ascending: true });
+  try {
+    const { data, error } = await supabase
+      .from('content_items')
+      .select('type, slug, title, category, description, details, date_text')
+      .eq('type', type)
+      .order('title', { ascending: true });
 
-  if (error) {
-    return { data: getContentList(type), error, source: 'local-fallback' };
+    if (error) return localResult(type, undefined, error);
+    return { data: (data ?? []).map(mapRemoteItem), error: null, source: 'supabase' };
+  } catch (error) {
+    return localResult(type, undefined, fallbackError(error));
   }
-
-  return { data: (data ?? []).map(mapRemoteItem), error: null, source: 'supabase' };
 }
 
 export async function getContentByIdRemote(type, id) {
@@ -69,39 +79,48 @@ export async function getContentByIdRemote(type, id) {
     return { data: getContentById(type, id), error: null, source: 'local' };
   }
 
-  const { data, error } = await supabase
-    .from('content_items')
-    .select('type, slug, title, category, description, details, date_text')
-    .eq('type', type)
-    .eq('slug', id)
-    .maybeSingle();
+  try {
+    const { data, error } = await supabase
+      .from('content_items')
+      .select('type, slug, title, category, description, details, date_text')
+      .eq('type', type)
+      .eq('slug', id)
+      .maybeSingle();
 
-  if (error) {
-    return { data: getContentById(type, id), error, source: 'local-fallback' };
+    if (error) {
+      return { data: getContentById(type, id), error, source: 'local-fallback' };
+    }
+
+    return { data: data ? mapRemoteItem(data) : null, error: null, source: 'supabase' };
+  } catch (error) {
+    return {
+      data: getContentById(type, id),
+      error: fallbackError(error),
+      source: 'local-fallback',
+    };
   }
-
-  return { data: data ? mapRemoteItem(data) : null, error: null, source: 'supabase' };
 }
 
-export async function searchContentRemote(type, query) {
+export async function searchContentRemote(type, query = '') {
   const normalized = query.trim();
   if (!isSupabaseConfigured || !supabase || !contentTypes[type]) {
-    return { data: searchContent(type, query), error: null, source: 'local' };
+    return localResult(type, query);
   }
 
   if (!normalized) return getContentListRemote(type);
 
-  const pattern = `%${normalized.replace(/[%_]/g, '\\$&')}%`;
-  const { data, error } = await supabase
-    .from('content_items')
-    .select('type, slug, title, category, description, details, date_text')
-    .eq('type', type)
-    .or(`title.ilike.${pattern},category.ilike.${pattern},description.ilike.${pattern},details.ilike.${pattern}`)
-    .order('title', { ascending: true });
+  try {
+    const pattern = `%${normalized.replace(/[%_]/g, '\\$&')}%`;
+    const { data, error } = await supabase
+      .from('content_items')
+      .select('type, slug, title, category, description, details, date_text')
+      .eq('type', type)
+      .or(`title.ilike.${pattern},category.ilike.${pattern},description.ilike.${pattern},details.ilike.${pattern}`)
+      .order('title', { ascending: true });
 
-  if (error) {
-    return { data: searchContent(type, query), error, source: 'local-fallback' };
+    if (error) return localResult(type, query, error);
+    return { data: (data ?? []).map(mapRemoteItem), error: null, source: 'supabase' };
+  } catch (error) {
+    return localResult(type, query, fallbackError(error));
   }
-
-  return { data: (data ?? []).map(mapRemoteItem), error: null, source: 'supabase' };
 }
