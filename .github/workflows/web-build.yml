@@ -18,6 +18,8 @@ jobs:
           node-version: 20.19.0
       - name: Install dependencies
         run: npm install
+      - name: Validate content service contracts
+        run: npm run test:content
       - name: Validate Expo project
         run: npx expo-doctor
       - name: Export web production build
