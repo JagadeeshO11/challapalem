@@ -9,7 +9,8 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "build:web": "expo export -p web",
-    "check": "npx expo-doctor"
+    "check": "npx expo-doctor",
+    "test:content": "node src/services/contentService.test.js"
   },
   "engines": {
     "node": ">=20.19.0"
