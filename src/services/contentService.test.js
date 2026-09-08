@@ -3,7 +3,7 @@ import {
   getContentCollection,
   getContentList,
   searchContent,
-} from './contentService';
+} from './contentService.js';
 
 function assert(condition, message) {
   if (!condition) throw new Error(message);
