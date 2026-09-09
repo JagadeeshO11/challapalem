@@ -1,5 +1,5 @@
-import { places, events, businesses, community } from '../data/content';
-import { isSupabaseConfigured, supabase } from '../lib/supabase';
+import { places, events, businesses, community } from '../data/content.js';
+import { isSupabaseConfigured, supabase } from '../lib/supabase.js';
 
 const collections = { places, events, businesses, community };
 
