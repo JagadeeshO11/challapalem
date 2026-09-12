@@ -2,6 +2,7 @@ import { places, events, businesses, community } from '../data/content.js';
 import { isSupabaseConfigured, supabase } from '../lib/supabase.js';
 
 const collections = { places, events, businesses, community };
+const remoteFields = 'type, slug, title, category, description, details, date_text';
 
 export const contentTypes = Object.freeze({
   place: 'places',
@@ -55,16 +56,21 @@ function fallbackError(error) {
   return error instanceof Error ? error : new Error('The online directory is temporarily unavailable.');
 }
 
+function publishedContentQuery(type) {
+  return supabase
+    .from('content_items')
+    .select(remoteFields)
+    .eq('type', type)
+    .eq('published', true);
+}
+
 export async function getContentListRemote(type) {
   if (!isSupabaseConfigured || !supabase || !contentTypes[type]) {
     return localResult(type);
   }
 
   try {
-    const { data, error } = await supabase
-      .from('content_items')
-      .select('type, slug, title, category, description, details, date_text')
-      .eq('type', type)
+    const { data, error } = await publishedContentQuery(type)
       .order('title', { ascending: true });
 
     if (error) return localResult(type, undefined, error);
@@ -80,10 +86,7 @@ export async function getContentByIdRemote(type, id) {
   }
 
   try {
-    const { data, error } = await supabase
-      .from('content_items')
-      .select('type, slug, title, category, description, details, date_text')
-      .eq('type', type)
+    const { data, error } = await publishedContentQuery(type)
       .eq('slug', id)
       .maybeSingle();
 
@@ -111,10 +114,7 @@ export async function searchContentRemote(type, query = '') {
 
   try {
     const pattern = `%${normalized.replace(/[%_]/g, '\\$&')}%`;
-    const { data, error } = await supabase
-      .from('content_items')
-      .select('type, slug, title, category, description, details, date_text')
-      .eq('type', type)
+    const { data, error } = await publishedContentQuery(type)
       .or(`title.ilike.${pattern},category.ilike.${pattern},description.ilike.${pattern},details.ilike.${pattern}`)
       .order('title', { ascending: true });
 
