@@ -3,6 +3,7 @@ import { isSupabaseConfigured, supabase } from '../lib/supabase.js';
 
 const collections = { places, events, businesses, community };
 const remoteFields = 'type, slug, title, category, description, details, date_text';
+const MAX_REMOTE_SEARCH_LENGTH = 120;
 
 export const contentTypes = Object.freeze({
   place: 'places',
@@ -64,6 +65,25 @@ function publishedContentQuery(type) {
     .eq('published', true);
 }
 
+function escapePostgrestQuotedValue(value) {
+  return value.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+}
+
+export function buildSearchFilter(query) {
+  const normalized = query.trim().slice(0, MAX_REMOTE_SEARCH_LENGTH);
+  const escapedPattern = normalized
+    .replace(/\\/g, '\\\\')
+    .replace(/[%_]/g, '\\$&');
+  const quotedPattern = `"%${escapePostgrestQuotedValue(escapedPattern)}%"`;
+
+  return [
+    `title.ilike.${quotedPattern}`,
+    `category.ilike.${quotedPattern}`,
+    `description.ilike.${quotedPattern}`,
+    `details.ilike.${quotedPattern}`,
+  ].join(',');
+}
+
 export async function getContentListRemote(type) {
   if (!isSupabaseConfigured || !supabase || !contentTypes[type]) {
     return localResult(type);
@@ -113,9 +133,8 @@ export async function searchContentRemote(type, query = '') {
   if (!normalized) return getContentListRemote(type);
 
   try {
-    const pattern = `%${normalized.replace(/[%_]/g, '\\$&')}%`;
     const { data, error } = await publishedContentQuery(type)
-      .or(`title.ilike.${pattern},category.ilike.${pattern},description.ilike.${pattern},details.ilike.${pattern}`)
+      .or(buildSearchFilter(normalized))
       .order('title', { ascending: true });
 
     if (error) return localResult(type, query, error);
