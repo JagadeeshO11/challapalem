@@ -1,5 +1,6 @@
 import { readFile } from 'node:fs/promises';
 import {
+  buildSearchFilter,
   getContentById,
   getContentCollection,
   getContentList,
@@ -26,6 +27,11 @@ for (const type of types) {
 assert(getContentCollection('unknown').length === 0, 'Unknown types should return an empty collection');
 assert(getContentById('place', 'missing-id') === null, 'Missing items should return null');
 assert(searchContent('unknown', 'anything').length === 0, 'Unknown type search should be empty');
+
+const specialQuery = 'shops, (nearby) 50%_ "quoted"';
+const searchFilter = buildSearchFilter(specialQuery);
+assert(searchFilter.includes('title.ilike."%shops\\, \\(nearby\\) 50\\%\\_ \\\"quoted\\\"%"'), 'Search filters must quote and escape PostgREST reserved characters');
+assert(!buildSearchFilter('x'.repeat(121)).includes('x'.repeat(121)), 'Remote search filters must cap untrusted query length');
 
 // Guard the production boundary as well as the local data API. The public client
 // must always add the published filter before querying Supabase, even though RLS
