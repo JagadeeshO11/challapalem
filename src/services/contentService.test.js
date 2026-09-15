@@ -30,7 +30,10 @@ assert(searchContent('unknown', 'anything').length === 0, 'Unknown type search s
 
 const specialQuery = 'shops, (nearby) 50%_ "quoted"';
 const searchFilter = buildSearchFilter(specialQuery);
-assert(searchFilter.includes('title.ilike."%shops\\, \\(nearby\\) 50\\%\\_ \\\"quoted\\\"%"'), 'Search filters must quote and escape PostgREST reserved characters');
+assert(searchFilter.startsWith('title.ilike."%'), 'Search filters must use quoted PostgREST values');
+assert(searchFilter.includes('shops, (nearby)'), 'Quoted search values must preserve reserved punctuation');
+assert(searchFilter.includes('50\\\\%\\\\_'), 'LIKE wildcards in user input must remain literal');
+assert(searchFilter.includes('\\\\"quoted\\\\"'), 'Quotes inside user input must be escaped');
 assert(!buildSearchFilter('x'.repeat(121)).includes('x'.repeat(121)), 'Remote search filters must cap untrusted query length');
 
 // Guard the production boundary as well as the local data API. The public client
