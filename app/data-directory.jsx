@@ -22,7 +22,7 @@ const routeFor = {
   community: '/community',
 };
 
-export default function DataDirectory({ title, eyebrow, description, detailType }) {
+export default function DataDirectory({ title, eyebrow, description, detailType, headerSlot = null }) {
   const [query, setQuery] = useState('');
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -53,6 +53,7 @@ export default function DataDirectory({ title, eyebrow, description, detailType 
       <Text style={styles.eyebrow}>{eyebrow}</Text>
       <Text style={styles.title}>{title}</Text>
       <Text style={styles.description}>{description}</Text>
+      {headerSlot}
       <TextInput value={query} onChangeText={setQuery} placeholder="Search this section..." placeholderTextColor="#899189" accessibilityLabel={`Search ${title}`} returnKeyType="search" style={styles.search} />
       {errorMessage ? <Text style={styles.notice}>{errorMessage}</Text> : null}
       {loading ? (
