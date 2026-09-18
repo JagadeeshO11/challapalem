@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { Stack, router } from 'expo-router';
-import { submitContent, submissionTypes, validateSubmission } from '../src/services/submissionService';
+import { submitContent, validateSubmission } from '../src/services/submissionService.js';
 import { theme } from '../src/theme';
 
 const typeOptions = [
