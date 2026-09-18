@@ -20,6 +20,8 @@ jobs:
         run: npm install --no-audit --no-fund
       - name: Validate content service contracts
         run: npm run test:content
+      - name: Validate submission service contracts
+        run: npm run test:submissions
       - name: Validate Supabase migration contracts
         run: npm run test:supabase-migrations
       - name: Validate Expo project
