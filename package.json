@@ -12,6 +12,7 @@
     "build:web": "expo export -p web",
     "check": "npx expo-doctor",
     "test:content": "node src/services/contentService.test.js",
+    "test:submissions": "node src/services/submissionService.test.js",
     "test:supabase-migrations": "node supabase/migrations/004_content_submission_admin.test.js"
   },
   "engines": {
