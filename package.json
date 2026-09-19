@@ -13,7 +13,8 @@
     "check": "npx expo-doctor",
     "test:content": "node src/services/contentService.test.js",
     "test:submissions": "node src/services/submissionService.test.js",
-    "test:supabase-migrations": "node supabase/migrations/004_content_submission_admin.test.js"
+    "test:supabase-migrations": "node supabase/migrations/004_content_submission_admin.test.js",
+    "test:moderation-rpc": "node supabase/migrations/005_submission_moderation_rpc.test.js"
   },
   "engines": {
     "node": ">=20.19.4"
