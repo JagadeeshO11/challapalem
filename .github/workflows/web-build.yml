@@ -26,6 +26,8 @@ jobs:
         run: npm run test:supabase-migrations
       - name: Validate moderation RPC contracts
         run: npm run test:moderation-rpc
+      - name: Validate moderation service contracts
+        run: npm run test:moderation-service
       - name: Validate Expo project
         run: npx expo-doctor
       - name: Export web production build
