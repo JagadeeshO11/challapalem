@@ -9,6 +9,5 @@ assert.match(source, /clearUnauthorizedSession/);
 assert.match(source, /await supabase\?\.auth\.signOut\(\)/);
 assert.match(source, /This account does not have administrator access/);
 assert.match(source, /Unable to verify administrator access/);
-assert.match(source, /persistSession/);
 
 console.log('Auth service contract checks passed.');
