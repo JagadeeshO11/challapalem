@@ -4,6 +4,15 @@ function unavailable(message) {
   return { data: null, error: new Error(message) };
 }
 
+async function clearUnauthorizedSession(message) {
+  try {
+    await supabase?.auth.signOut();
+  } catch {
+    // Keep the authorization error even if local session cleanup fails.
+  }
+  return unavailable(message);
+}
+
 export async function signInAdmin(email, password) {
   const normalizedEmail = String(email ?? '').trim().toLowerCase();
   if (!normalizedEmail || !password) {
@@ -24,13 +33,11 @@ export async function signInAdmin(email, password) {
 
     const { data: adminData, error: adminError } = await supabase.rpc('is_admin');
     if (adminError) {
-      await supabase.auth.signOut();
-      return { data: null, error: adminError };
+      return clearUnauthorizedSession('Unable to verify administrator access.');
     }
 
     if (!adminData) {
-      await supabase.auth.signOut();
-      return unavailable('This account does not have administrator access.');
+      return clearUnauthorizedSession('This account does not have administrator access.');
     }
 
     return { data, error: null };
@@ -51,8 +58,12 @@ export async function getAdminSession() {
     if (!sessionData.session) return { data: null, error: null };
 
     const { data: adminData, error: adminError } = await supabase.rpc('is_admin');
-    if (adminError) return { data: null, error: adminError };
-    if (!adminData) return { data: null, error: new Error('This account does not have administrator access.') };
+    if (adminError) {
+      return clearUnauthorizedSession('Unable to verify administrator access.');
+    }
+    if (!adminData) {
+      return clearUnauthorizedSession('This account does not have administrator access.');
+    }
 
     return { data: sessionData.session, error: null };
   } catch (error) {
