@@ -5,6 +5,7 @@ import { approveSubmission, listPendingSubmissions, rejectSubmission } from '../
 import { getAdminSession, signInAdmin, signOutAdmin } from '../src/services/authService.js';
 import { theme } from '../src/theme';
 
+const PAGE_SIZE = 50;
 const typeLabels = { place: 'Place', event: 'Event', business: 'Business', community: 'Community' };
 
 function formatDate(value) {
@@ -23,16 +24,23 @@ export default function AdminScreen() {
   const [submissions, setSubmissions] = useState([]);
   const [queueError, setQueueError] = useState('');
   const [actionId, setActionId] = useState(null);
+  const [queueOffset, setQueueOffset] = useState(0);
+  const [hasMore, setHasMore] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
 
-  const loadQueue = useCallback(async () => {
+  const loadQueue = useCallback(async ({ append = false } = {}) => {
     setQueueError('');
-    const result = await listPendingSubmissions();
+    const offset = append ? queueOffset : 0;
+    const result = await listPendingSubmissions({ limit: PAGE_SIZE, offset });
     if (result.error) {
       setQueueError(result.error.message);
       return;
     }
-    setSubmissions(result.data ?? []);
-  }, []);
+    const page = result.data ?? [];
+    setSubmissions((current) => (append ? [...current, ...page] : page));
+    setQueueOffset(offset + page.length);
+    setHasMore(page.length === PAGE_SIZE);
+  }, [queueOffset]);
 
   useEffect(() => {
     let active = true;
@@ -58,7 +66,29 @@ export default function AdminScreen() {
     }
     setSession(result.data?.session ?? result.data ?? true);
     setPassword('');
+    setQueueOffset(0);
     await loadQueue();
+  };
+
+  const handleLoadMore = async () => {
+    if (loadingMore || !hasMore) return;
+    setLoadingMore(true);
+    await loadQueue({ append: true });
+    setLoadingMore(false);
+  };
+
+  const handleRefresh = async () => {
+    setQueueOffset(0);
+    setHasMore(false);
+    const result = await listPendingSubmissions({ limit: PAGE_SIZE, offset: 0 });
+    if (result.error) {
+      setQueueError(result.error.message);
+      return;
+    }
+    const page = result.data ?? [];
+    setSubmissions(page);
+    setQueueOffset(page.length);
+    setHasMore(page.length === PAGE_SIZE);
   };
 
   const handleModeration = async (id, action) => {
@@ -77,6 +107,8 @@ export default function AdminScreen() {
     await signOutAdmin();
     setSession(null);
     setSubmissions([]);
+    setQueueOffset(0);
+    setHasMore(false);
   };
 
   if (checking) {
@@ -116,7 +148,7 @@ export default function AdminScreen() {
       </View>
 
       {queueError ? <Text style={styles.error}>{queueError}</Text> : null}
-      <Pressable onPress={loadQueue} style={styles.refresh}><Text style={styles.refreshText}>Refresh queue</Text></Pressable>
+      <Pressable onPress={handleRefresh} style={styles.refresh}><Text style={styles.refreshText}>Refresh queue</Text></Pressable>
 
       {submissions.length === 0 ? (
         <View style={styles.empty}><Text style={styles.emptyTitle}>No pending submissions</Text><Text style={styles.emptyText}>The moderation queue is clear.</Text></View>
@@ -139,6 +171,12 @@ export default function AdminScreen() {
           </View>
         </View>
       ))}
+
+      {hasMore ? (
+        <Pressable disabled={loadingMore} onPress={handleLoadMore} style={[styles.loadMore, loadingMore && styles.disabled]}>
+          {loadingMore ? <ActivityIndicator color={theme.colors.primary} /> : <Text style={styles.loadMoreText}>Load more submissions</Text>}
+        </Pressable>
+      ) : null}
     </ScrollView>
   );
 }
@@ -180,4 +218,6 @@ const styles = StyleSheet.create({
   rejectText: { color: '#9B3D30', fontWeight: '900' },
   approveButton: { flex: 1, minHeight: 48, borderRadius: theme.radius.md, backgroundColor: theme.colors.primary, alignItems: 'center', justifyContent: 'center' },
   approveText: { color: theme.colors.inverse, fontWeight: '900' },
+  loadMore: { minHeight: 50, borderWidth: 1, borderColor: theme.colors.border, borderRadius: theme.radius.md, alignItems: 'center', justifyContent: 'center', marginTop: 2, marginBottom: 24 },
+  loadMoreText: { color: theme.colors.primary, fontWeight: '900' },
 });
