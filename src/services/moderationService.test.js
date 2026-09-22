@@ -9,6 +9,9 @@ const required = [
   ".from('content_submissions')",
   ".eq('status', 'pending')",
   ".order('created_at', { ascending: true })",
+  '.range(pageOffset, pageOffset + pageSize - 1)',
+  'DEFAULT_PAGE_SIZE = 50',
+  'MAX_PAGE_SIZE = 100',
   'Number.isInteger(id)',
 ];
 
