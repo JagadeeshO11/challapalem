@@ -28,19 +28,19 @@ export default function AdminScreen() {
   const [hasMore, setHasMore] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
 
-  const loadQueue = useCallback(async ({ append = false } = {}) => {
+  const loadQueue = useCallback(async ({ append = false, offset = 0 } = {}) => {
     setQueueError('');
-    const offset = append ? queueOffset : 0;
     const result = await listPendingSubmissions({ limit: PAGE_SIZE, offset });
     if (result.error) {
       setQueueError(result.error.message);
-      return;
+      return false;
     }
     const page = result.data ?? [];
     setSubmissions((current) => (append ? [...current, ...page] : page));
     setQueueOffset(offset + page.length);
     setHasMore(page.length === PAGE_SIZE);
-  }, [queueOffset]);
+    return true;
+  }, []);
 
   useEffect(() => {
     let active = true;
@@ -50,7 +50,7 @@ export default function AdminScreen() {
       setSession(result.data);
       setChecking(false);
       if (result.error && result.data === null) setLoginError(result.error.message);
-      if (result.data) await loadQueue();
+      if (result.data) await loadQueue({ offset: 0 });
     })();
     return () => { active = false; };
   }, [loadQueue]);
@@ -66,29 +66,18 @@ export default function AdminScreen() {
     }
     setSession(result.data?.session ?? result.data ?? true);
     setPassword('');
-    setQueueOffset(0);
-    await loadQueue();
+    await loadQueue({ offset: 0 });
   };
 
   const handleLoadMore = async () => {
     if (loadingMore || !hasMore) return;
     setLoadingMore(true);
-    await loadQueue({ append: true });
+    await loadQueue({ append: true, offset: queueOffset });
     setLoadingMore(false);
   };
 
   const handleRefresh = async () => {
-    setQueueOffset(0);
-    setHasMore(false);
-    const result = await listPendingSubmissions({ limit: PAGE_SIZE, offset: 0 });
-    if (result.error) {
-      setQueueError(result.error.message);
-      return;
-    }
-    const page = result.data ?? [];
-    setSubmissions(page);
-    setQueueOffset(page.length);
-    setHasMore(page.length === PAGE_SIZE);
+    await loadQueue({ offset: 0 });
   };
 
   const handleModeration = async (id, action) => {
