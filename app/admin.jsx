@@ -89,7 +89,9 @@ export default function AdminScreen() {
       setQueueError(result.error.message);
       return;
     }
-    setSubmissions((current) => current.filter((item) => item.id !== id));
+    // Re-query from the first page after a moderation action. Pending rows move
+    // out of the queue, so retaining the old offset could skip newly exposed rows.
+    await loadQueue({ offset: 0 });
   };
 
   const handleSignOut = async () => {
