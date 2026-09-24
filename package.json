@@ -15,6 +15,7 @@
     "test:submissions": "node src/services/submissionService.test.js",
     "test:supabase-migrations": "node supabase/migrations/004_content_submission_admin.test.js",
     "test:moderation-rpc": "node supabase/migrations/005_submission_moderation_rpc.test.js",
+    "test:moderation-audit": "node supabase/migrations/006_moderation_audit.test.js",
     "test:moderation-service": "node src/services/moderationService.test.js",
     "test:auth-service": "node src/services/authService.test.js"
   },
