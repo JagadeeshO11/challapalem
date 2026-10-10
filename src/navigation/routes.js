@@ -7,6 +7,7 @@ export const routes = {
   events: '/events',
   businesses: '/businesses',
   community: '/community',
+  projects: '/projects',
   gallery: '/gallery',
   profile: '/profile',
   signIn: '/auth/sign-in',

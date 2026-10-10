@@ -32,6 +32,10 @@ jobs:
         run: npm run test:moderation-service
       - name: Validate admin authentication contracts
         run: npm run test:auth-service
+      - name: Validate village project service
+        run: npm run test:projects
+      - name: Validate village project migration
+        run: npm run test:project-migration
       - name: Validate Expo project
         run: npx expo-doctor
       - name: Export web production build
