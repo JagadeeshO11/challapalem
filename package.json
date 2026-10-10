@@ -17,7 +17,9 @@
     "test:moderation-rpc": "node supabase/migrations/005_submission_moderation_rpc.test.js",
     "test:moderation-audit": "node supabase/migrations/006_moderation_audit.test.js",
     "test:moderation-service": "node src/services/moderationService.test.js",
-    "test:auth-service": "node src/services/authService.test.js"
+    "test:auth-service": "node src/services/authService.test.js",
+    "test:projects": "node src/services/projectService.test.js",
+    "test:project-migration": "node supabase/migrations/007_village_projects.test.js"
   },
   "engines": {
     "node": ">=20.19.4"
